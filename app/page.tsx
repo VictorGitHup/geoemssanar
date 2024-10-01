@@ -3,19 +3,24 @@
 import { useState } from "react";
 import Image from "next/image";
 import { fetchGeoData } from "./components/geo"; // Ajusta la ruta según tu estructura
+import Map from "./components/Map"; // Asegúrate de que la ruta sea correcta
 
 // Define interfaces para los tipos de datos esperados
 interface GeoData {
-  id: number;
-  name: string;
-  // Agrega más propiedades según tu estructura de datos
+  departamento_nombre: string;
+  municipio_nombre: string;
+  region: string;
+  subregion: string;
+  prestador_nombre: string;
+  latitud: number;
+  longitud: number;
 }
 
 export default function Home() {
   // Estados para guardar la selección de departamento y municipio
   const [departamento, setDepartamento] = useState<number | "">("");
   const [municipio, setMunicipio] = useState<number | "">("");
-  const [data, setData] = useState<GeoData | null>(null); // Para almacenar los datos de la respuesta
+  const [data, setData] = useState<GeoData[]>([]); // Para almacenar los datos de la respuesta
   const [error, setError] = useState<string>(""); // Para almacenar errores
 
   // Función para manejar el envío del formulario
@@ -31,7 +36,7 @@ export default function Home() {
     // Realizar la solicitud a la API de Supabase
     try {
       const result = await fetchGeoData(departamento, municipio);
-      setData(result as GeoData); // Guardar datos en el estado, especificando el tipo
+      setData(result as GeoData[]); // Guardar datos en el estado, especificando el tipo
       setError(""); // Limpiar errores
       alert("Datos recibidos correctamente. Consulta la consola.");
     } catch (error) {
@@ -40,6 +45,8 @@ export default function Home() {
       alert("Hubo un problema al enviar los datos. Revisa la consola.");
     }
   };
+
+  const isCoordinatesValid = data.length > 0 && typeof data[0].latitud === 'number' && typeof data[0].longitud === 'number';
 
   return (
     <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
@@ -93,7 +100,7 @@ export default function Home() {
 
         {/* Muestra los datos obtenidos o un mensaje de error */}
         {error && <p className="text-red-500">{error}</p>}
-        {data && <div>{JSON.stringify(data)}</div>}
+        {isCoordinatesValid && <Map latitude={data[0].latitud} longitude={data[0].longitud} />}
       </main>
       <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
         {/* Pie de página adicional */}
