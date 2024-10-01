@@ -58,7 +58,7 @@ export default function Home() {
               required
             >
               <option value="">Seleccione un departamento</option>
-              <option value="76">Valle del Cauca (76)</option>
+              <option value="76">Valle del Cauca</option>
               {/* Puedes agregar más departamentos si es necesario */}
             </select>
           </label>
@@ -72,7 +72,7 @@ export default function Home() {
               required
             >
               <option value="">Seleccione un municipio</option>
-              <option value="76109">Buenaventura (76109)</option>
+              <option value="76109">Buenaventura</option>
               {/* Puedes agregar más municipios si es necesario */}
             </select>
           </label>
