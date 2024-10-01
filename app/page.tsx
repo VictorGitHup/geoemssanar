@@ -6,7 +6,6 @@ import { fetchGeoData } from "./components/geo"; // Ajusta la ruta según tu est
 
 // Define interfaces para los tipos de datos esperados
 interface GeoData {
-  // Especifica las propiedades que esperas recibir en la respuesta
   id: number;
   name: string;
   // Agrega más propiedades según tu estructura de datos
@@ -32,18 +31,12 @@ export default function Home() {
     // Realizar la solicitud a la API de Supabase
     try {
       const result = await fetchGeoData(departamento, municipio);
-      setData(result); // Guardar datos en el estado
+      setData(result as GeoData); // Guardar datos en el estado, especificando el tipo
       setError(""); // Limpiar errores
       alert("Datos recibidos correctamente. Consulta la consola.");
-    } catch (error: unknown) {
-      // Manejo seguro del error
-      if (error instanceof Error) {
-        console.error("Error al hacer la solicitud:", error);
-        setError(error.message); // Guardar error en el estado
-      } else {
-        console.error("Error desconocido:", error);
-        setError("Error desconocido al realizar la solicitud."); // Guardar un mensaje genérico
-      }
+    } catch (error) {
+      console.error("Error al hacer la solicitud:", error);
+      setError("Hubo un problema al enviar los datos. Revisa la consola."); // Guardar mensaje de error en el estado
       alert("Hubo un problema al enviar los datos. Revisa la consola.");
     }
   };
