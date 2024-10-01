@@ -14,7 +14,7 @@ const mapContainerStyle = {
 const Map: React.FC<MapProps> = ({ latitude, longitude }) => {
   // Comprobar si las coordenadas son válidas
   if (isNaN(latitude) || isNaN(longitude)) {
-    return <div>Error: Coordenadas inválidas.</div>; // Muestra un mensaje de error si las coordenadas son inválidas
+    return <div>Error: Coordenadas inválidas.</div>;
   }
 
   const position = { lat: latitude, lng: longitude };

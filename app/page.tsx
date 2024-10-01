@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { fetchGeoData } from "./components/geo"; // Ajusta la ruta según tu estructura
-import Map from "./components/Map"; // Asegúrate de que la ruta sea correcta
+import { fetchGeoData } from "./components/geo";
+import Map from "./components/Map";
 
 // Define interfaces para los tipos de datos esperados
 interface GeoData {
