@@ -1,15 +1,22 @@
-// app/page.tsx
 "use client"; // Esto indica que este componente es del lado del cliente
 
 import { useState } from "react";
 import Image from "next/image";
 import { fetchGeoData } from "./components/geo"; // Ajusta la ruta según tu estructura
 
+// Define interfaces para los tipos de datos esperados
+interface GeoData {
+  // Especifica las propiedades que esperas recibir en la respuesta
+  id: number;
+  name: string;
+  // Agrega más propiedades según tu estructura de datos
+}
+
 export default function Home() {
   // Estados para guardar la selección de departamento y municipio
   const [departamento, setDepartamento] = useState<number | "">("");
   const [municipio, setMunicipio] = useState<number | "">("");
-  const [data, setData] = useState<any>(null); // Para almacenar los datos de la respuesta
+  const [data, setData] = useState<GeoData | null>(null); // Para almacenar los datos de la respuesta
   const [error, setError] = useState<string>(""); // Para almacenar errores
 
   // Función para manejar el envío del formulario
@@ -28,9 +35,15 @@ export default function Home() {
       setData(result); // Guardar datos en el estado
       setError(""); // Limpiar errores
       alert("Datos recibidos correctamente. Consulta la consola.");
-    } catch (error: any) {
-      console.error("Error al hacer la solicitud:", error);
-      setError(error.message); // Guardar error en el estado
+    } catch (error: unknown) {
+      // Manejo seguro del error
+      if (error instanceof Error) {
+        console.error("Error al hacer la solicitud:", error);
+        setError(error.message); // Guardar error en el estado
+      } else {
+        console.error("Error desconocido:", error);
+        setError("Error desconocido al realizar la solicitud."); // Guardar un mensaje genérico
+      }
       alert("Hubo un problema al enviar los datos. Revisa la consola.");
     }
   };
