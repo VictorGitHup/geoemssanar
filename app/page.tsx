@@ -1,11 +1,10 @@
-"use client"; // Esto indica que este componente es del lado del cliente
+"use client";
+import { useState } from 'react';
+import Image from 'next/image';
+import { fetchGeoData } from './components/geo';
+import Map from './components/Map';
 
-import { useState } from "react";
-import Image from "next/image";
-import { fetchGeoData } from "./components/geo";
-import Map from "./components/Map";
 
-// Define interfaces para los tipos de datos esperados
 interface GeoData {
   departamento_nombre: string;
   municipio_nombre: string;
@@ -17,52 +16,58 @@ interface GeoData {
 }
 
 export default function Home() {
-  // Estados para guardar la selección de departamento y municipio
   const [departamento, setDepartamento] = useState<number | "">("");
   const [municipio, setMunicipio] = useState<number | "">("");
-  const [data, setData] = useState<GeoData[]>([]); // Para almacenar los datos de la respuesta
-  const [error, setError] = useState<string>(""); // Para almacenar errores
+  const [data, setData] = useState<GeoData[]>([]);
+  const [error, setError] = useState<string>("");
+  const [showInfo, setShowInfo] = useState<boolean>(false);  // Estado para mostrar/ocultar info
+
+
+  const [mapCoordinates, setMapCoordinates] = useState({ latitude: 4.60971, longitude: -74.08175 }); // Coordenadas iniciales (Bogotá)
+  const [zoomLevel, setZoomLevel] = useState<number>(6); // Zoom inicial
 
   // Función para manejar el envío del formulario
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    // Verificar que se seleccionaron departamento y municipio
     if (!departamento || !municipio) {
-      alert("Por favor, selecciona un departamento y un municipio.");
+      alert('Por favor, selecciona un departamento y un municipio.');
       return;
     }
 
-    // Realizar la solicitud a la API de Supabase
     try {
       const result = await fetchGeoData(departamento, municipio);
-      setData(result as GeoData[]); // Guardar datos en el estado, especificando el tipo
-      setError(""); // Limpiar errores
-      alert("Datos recibidos correctamente. Consulta la consola.");
+      setData(result as GeoData[]);
+      setError("");
+
+      // Cambiar las coordenadas y el zoom después de la selección
+      const { latitud, longitud } = result[0];
+      setMapCoordinates({ latitude: latitud, longitude: longitud });
+      setZoomLevel(14); // Cambia el zoom después de seleccionar
+
     } catch (error) {
-      console.error("Error al hacer la solicitud:", error);
-      setError("Hubo un problema al enviar los datos. Revisa la consola."); // Guardar mensaje de error en el estado
-      alert("Hubo un problema al enviar los datos. Revisa la consola.");
+      console.error('Error al hacer la solicitud:', error);
+      setError('Hubo un problema al enviar los datos.');
     }
   };
 
-  const isCoordinatesValid = data.length > 0 && typeof data[0].latitud === 'number' && typeof data[0].longitud === 'number';
-
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
+    <div className="relative h-screen w-screen">
+      {/* Mapa que ocupará toda la pantalla */}
+      <Map latitude={mapCoordinates.latitude} longitude={mapCoordinates.longitude} zoom={zoomLevel} />
+
+      {/* Contenedor flotante para el formulario */}
+      <div className="absolute left-2 top-14 bg-white p-6 rounded-lg shadow-lg z-10 w-72">
         <Image
-          className="dark:invert"
-          src="https://nextjs.org/icons/next.svg"
+          src="https://raw.githubusercontent.com/VictorGitHup/img/2d4cd36f1e3c384d3022ed7e269f0df4a95fc94b/logo-emssanareps.svg"
           alt="Next.js logo"
           width={180}
           height={38}
           priority
         />
 
-        {/* Formulario para seleccionar departamento y municipio */}
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-          <label className="flex flex-col gap-2">
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4 mt-4">
+          <label className="flex flex-col gap-2 text-custom-color">
             Departamento:
             <select
               value={departamento}
@@ -72,11 +77,10 @@ export default function Home() {
             >
               <option value="">Seleccione un departamento</option>
               <option value="76">Valle del Cauca</option>
-              {/* Puedes agregar más departamentos si es necesario */}
             </select>
           </label>
 
-          <label className="flex flex-col gap-2">
+          <label className="flex flex-col gap-2 text-custom-color">
             Municipio:
             <select
               value={municipio}
@@ -86,7 +90,6 @@ export default function Home() {
             >
               <option value="">Seleccione un municipio</option>
               <option value="76109">Buenaventura</option>
-              {/* Puedes agregar más municipios si es necesario */}
             </select>
           </label>
 
@@ -98,13 +101,57 @@ export default function Home() {
           </button>
         </form>
 
-        {/* Muestra los datos obtenidos o un mensaje de error */}
+        {/* Muestra los errores si los hay */}
         {error && <p className="text-red-500">{error}</p>}
-        {isCoordinatesValid && <Map latitude={data[0].latitud} longitude={data[0].longitud} />}
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        {/* Pie de página adicional */}
-      </footer>
+      </div>
+
+      {/* Contenedor flotante para mostrar solo los datos de prestador */}
+      {data.length > 0 && (
+        <div className="absolute right-2 top-14 bg-white p-6 rounded-lg shadow-lg z-10 w-72">
+          <h2 className="text-lg font-semibold mb-4 text-custom-color">Prestador Primario</h2>
+          <ul className="list-disc pl-5 text-custom-color">
+            {data.map((item, index) => (
+              <li key={index} className="mb-2">{item.prestador_nombre}</li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {/* Contenedor flotante para mostrar información complementaria */}
+      {data.length > 0 && (
+        <div className="absolute left-1/2 transform -translate-x-1/2 bottom-10 bg-white p-6 rounded-lg shadow-lg z-10 w-full max-w-4xl">
+          {/* Botón para desplegar o esconder la información */}
+          <h5
+            className="text-lg font-semibold mb-4 text-custom-color text-sm text-center cursor-pointer"
+            onClick={() => setShowInfo(!showInfo)}  // Toggle entre mostrar/ocultar
+          >
+            Información Complementaria {showInfo ? '▲' : '▼'}
+          </h5>
+
+          {/* Contenedor horizontal que se despliega o esconde */}
+          {showInfo && (
+            <div className="flex justify-between gap-8">
+              {/* Bloque para la Región */}
+              <div className="bg-gray-100 p-4 rounded-lg flex-1">
+                <div className="flex justify-between w-full text-custom-color text-sm">
+                  <span className="font-semibold">Región:</span>
+                  <span>{Array.from(new Set(data.map(item => item.region))).join(", ")}</span>
+                </div>
+              </div>
+
+              {/* Bloque para la Subregión */}
+              <div className="bg-gray-100 p-4 rounded-lg flex-1">
+                <div className="flex justify-between w-full text-custom-color text-sm">
+                  <span className="font-semibold">Subregión:</span>
+                  <span>{Array.from(new Set(data.map(item => item.subregion))).join(", ")}</span>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+
     </div>
   );
 }
