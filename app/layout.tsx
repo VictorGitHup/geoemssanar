@@ -15,7 +15,7 @@ const geistMono = localFont({
 
 export const metadata: Metadata = {
   title: "Geo Emssanar",
-  description: "VictorB",
+  description: "Created by Victor Botina",
 };
 
 export default function RootLayout({
