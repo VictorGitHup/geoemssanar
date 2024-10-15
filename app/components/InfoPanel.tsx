@@ -14,7 +14,7 @@ const InfoPanel: React.FC<{ data: GeoData[] }> = ({ data }) => {
 
   // Verificar si hay datos disponibles
   if (data.length === 0) {
-    return <p>No hay datos disponibles.</p>; // Mensaje si no hay datos
+    return <p>No hay datos disponibles_.</p>; // Mensaje si no hay datos
   }
 
   // Estructura de especialidades a partir de los datos
