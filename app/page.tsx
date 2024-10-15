@@ -5,7 +5,7 @@ import Image from "next/image";
 import { fetchGeoData } from "./components/geo";
 import Map from "./components/Map";
 import InfoPanel from "./components/InfoPanel";
-import { GeoData } from "./components/types"; // Importa GeoData
+import { GeoData } from "./components/types";
 
 export default function Home() {
   const [departamento, setDepartamento] = useState<number | "">("");
