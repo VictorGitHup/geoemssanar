@@ -109,7 +109,7 @@ export default function Home() {
         <InfoPanel data={data} />
       </div>
 
-      {/* Información Complementaria */}
+      {/* Información Complementaria - regiones*/}
       {data.length > 0 && (
         <div className="absolute left-1/2 transform -translate-x-1/2 bottom-10 bg-white p-6 rounded-lg shadow-lg z-10 w-full max-w-4xl">
           <h5
