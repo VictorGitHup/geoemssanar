@@ -13,6 +13,7 @@ export default function Home() {
   const [data, setData] = useState<GeoData[]>([]);
   const [error, setError] = useState<string>("");
   const [showInfo, setShowInfo] = useState<boolean>(false);
+  const [showInfoPanel, setShowInfoPanel] = useState<boolean>(false); // Nuevo estado para el InfoPanel
 
   const [mapCoordinates, setMapCoordinates] = useState({
     latitude: 2.454167,
@@ -35,41 +36,46 @@ export default function Home() {
 
       const { latitud, longitud } = result[0];
       setMapCoordinates({ latitude: latitud, longitude: longitud });
-      setZoomLevel(14);
+      setZoomLevel(15); // Ajusta el nivel de zoom al buscar
+      setShowInfoPanel(true); // Muestra el InfoPanel al buscar
     } catch (error) {
       console.error("Error al hacer la solicitud:", error);
       setError("Hubo un problema al enviar los datos.");
     }
   };
 
-  // Función actualizada para manejar la selección de ubicación
+  // Función para manejar la selección de ubicación
   const handleLocationSelect = (location: google.maps.LatLngLiteral) => {
-    // Asegurarse de que las propiedades coincidan
     setMapCoordinates({
-      latitude: location.lat, // Cambiar 'lat' por 'latitude' si es necesario
-      longitude: location.lng, // Cambiar 'lng' por 'longitude' si es necesario
+      latitude: location.lat,
+      longitude: location.lng,
     });
-    setZoomLevel(14); // Ajusta el zoom si es necesario
-    console.log('Ubicación seleccionada:', location); // Debugging
+    setZoomLevel(16); // Establece el nivel de zoom al seleccionar desde el InfoPanel
+    console.log('Ubicación seleccionada:', location);
+  };
+
+  // Función para cerrar el InfoPanel
+  const handleCloseInfoPanel = () => {
+    setShowInfoPanel(false);
   };
 
   return (
-    <div className="relative h-screen w-screen">
+    <div className="relative h-screen w-screen flex flex-col">
       <Map
         latitude={mapCoordinates.latitude}
         longitude={mapCoordinates.longitude}
         zoom={zoomLevel}
       />
 
-      <div className="absolute left-2 top-14 bg-white p-6 rounded-lg shadow-lg z-10 w-72">
+      <div className="absolute left-2 top-14 bg-white p-4 rounded-lg shadow-lg z-10 w-72 sm:w-80 md:w-96 lg:w-1/6">
         <Image
           src="https://raw.githubusercontent.com/VictorGitHup/img/2d4cd36f1e3c384d3022ed7e269f0df4a95fc94b/logo-emssanareps.svg"
-          alt="Next.js logo"
+          alt="Logo de Emssanar EPS"
           width={180}
           height={38}
           priority
         />
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4 mt-4">
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4 mt-6">
           <label className="flex flex-col gap-2 text-custom-color">
             Departamento:
             <select
@@ -104,9 +110,16 @@ export default function Home() {
         {error && <p className="text-red-500">{error}</p>}
       </div>
 
-      <div className="absolute right-2 top-14 z-10">
-        <InfoPanel data={data} onLocationSelect={handleLocationSelect} />
-      </div>
+      {/* InfoPanel con la nueva funcionalidad de cierre */}
+      {showInfoPanel && (
+        <div className="absolute right-2 top-14 z-10">
+          <InfoPanel 
+            data={data} 
+            onLocationSelect={handleLocationSelect} 
+            onClose={handleCloseInfoPanel} 
+          />
+        </div>
+      )}
 
       {data.length > 0 && (
         <div className="absolute left-1/2 transform -translate-x-1/2 bottom-10 bg-white p-6 rounded-lg shadow-lg z-10 w-full max-w-4xl">
@@ -118,7 +131,7 @@ export default function Home() {
           </h5>
 
           {showInfo && (
-            <div className="flex justify-between gap-8">
+            <div className="flex flex-col gap-4 md:flex-row md:justify-between">
               <div className="bg-gray-100 p-4 rounded-lg flex-1">
                 <div className="flex justify-between w-full text-custom-color text-sm">
                   <span className="font-semibold">Región:</span>

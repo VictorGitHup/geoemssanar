@@ -1,67 +1,97 @@
-// Selector.tsx
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from 'react';
 import { Specialty } from './types';
 
 interface SelectorProps {
   data: Specialty[];
   onCategoryChange: (category: string) => void;
   onSpecialtyChange: (specialty: string) => void;
+  selectedSpecialty: string; // Pasa el valor seleccionado
+  selectedCategory: string; // Pasa la categoría seleccionada
 }
 
-const Selector: React.FC<SelectorProps> = ({ data, onCategoryChange, onSpecialtyChange }) => {
-  const [selectedCategory, setSelectedCategory] = useState<string>("");
-  const [selectedSpecialty, setSelectedSpecialty] = useState<string>("");
+const Selector: React.FC<SelectorProps> = ({
+  data,
+  onCategoryChange,
+  onSpecialtyChange,
+  selectedSpecialty,
+  selectedCategory,
+}) => {
+  const [filteredSpecialties, setFilteredSpecialties] = useState<Specialty[]>([]);
+  const [showSpecialties, setShowSpecialties] = useState(false); // Nuevo estado para mostrar especialidades
 
   useEffect(() => {
-    if (selectedCategory) {
-      onCategoryChange(selectedCategory);
-    }
-  }, [selectedCategory, onCategoryChange]);
+    // Filtra las especialidades cuando cambia la categoría o al inicializar
+    const specialtiesForCategory = data.filter(
+      (item) => item.categoria_especialidad === selectedCategory
+    );
+    setFilteredSpecialties(specialtiesForCategory);
 
-  useEffect(() => {
-    if (selectedSpecialty) {
-      onSpecialtyChange(selectedSpecialty);
-    }
-  }, [selectedSpecialty, onSpecialtyChange]);
+    // Solo muestra las especialidades si hay una categoría seleccionada
+    setShowSpecialties(!!selectedCategory);
+  }, [selectedCategory, data]);
+
+  const handleSpecialtySelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    onSpecialtyChange(e.target.value);
+  };
+
+  const handleCategorySelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const selected = e.target.value;
+    onCategoryChange(selected);
+    
+    // Filtra las especialidades en base a la categoría seleccionada
+    const specialtiesForCategory = data.filter(
+      (item) => item.categoria_especialidad === selected
+    );
+    setFilteredSpecialties(specialtiesForCategory);
+    setShowSpecialties(!!selected); // Asegúrate de que las especialidades se muestren si hay una categoría
+  };
+
+  const categories = Array.from(new Set(data.map((item) => item.categoria_especialidad)));
 
   return (
-    <div className="bg-white p-6 rounded-lg shadow-lg w-120">
-      <h2 className="text-lg font-semibold mb-4 text-custom-color">Filtrar por Especialidad</h2>
-
-      <label className="flex flex-col gap-2 text-custom-color">
-        Categoría de Especialidad:
+    <div className="mb-4">
+      <div className="mb-4">
+        <label htmlFor="category" className="block text-gray-700 font-semibold mb-2">
+          Categoría:
+        </label>
         <select
-          value={selectedCategory}
-          onChange={(e) => setSelectedCategory(e.target.value)}
-          className="p-2 border rounded"
+          id="category"
+          value={selectedCategory || "default"} // Mantener un valor por defecto
+          onChange={handleCategorySelect}
+          className="w-full p-2 border border-gray-300 rounded-md shadow-sm text-custom-color focus:outline-none focus:ring-2 focus:ring-blue-400 transition duration-200"
         >
-          <option value="">Seleccione una categoría</option>
-          {Array.from(new Set(data.map((item) => item.categoria_especialidad))).map((category, index) => (
-            <option key={index} value={category}>
+          <option value="default" >
+            Seleccione una opción
+          </option>
+          {categories.map((category, index) => (
+            <option key={index} value={category} className="text-custom-color">
               {category}
             </option>
           ))}
         </select>
-      </label>
+      </div>
 
-      {selectedCategory && (
-        <label className="flex flex-col gap-2 text-custom-color">
-          Especialidad:
+      {showSpecialties && ( // Mostrar solo si hay una categoría seleccionada
+        <div>
+          <label htmlFor="specialty" className="block text-gray-700 font-semibold mb-2">
+            Especialidad:
+          </label>
           <select
-            value={selectedSpecialty}
-            onChange={(e) => setSelectedSpecialty(e.target.value)}
-            className="p-2 border rounded"
+            id="specialty"
+            value={selectedSpecialty || "default"} // Mantener un valor por defecto
+            onChange={handleSpecialtySelect}
+            className="w-full p-2 border border-gray-300 rounded-md shadow-sm text-custom-color focus:outline-none focus:ring-2 focus:ring-blue-400 transition duration-200"
           >
-            <option value="">Seleccione una especialidad</option>
-            {data
-              .filter((item) => item.categoria_especialidad === selectedCategory)
-              .map((item) => (
-                <option key={item.id} value={item.nombre_especialidad}>
-                  {item.nombre_especialidad}
-                </option>
-              ))}
+            <option value="default" >
+              Seleccione una opción
+            </option>
+            {filteredSpecialties.map((specialty) => (
+              <option key={specialty.id} value={specialty.nombre_especialidad} className="text-custom-color">
+                {specialty.nombre_especialidad}
+              </option>
+            ))}
           </select>
-        </label>
+        </div>
       )}
     </div>
   );
