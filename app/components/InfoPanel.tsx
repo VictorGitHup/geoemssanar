@@ -1,73 +1,91 @@
 // components/InfoPanel.tsx
-import React, { useState } from "react";
-import Selector from "./Selector";
+import React, { useState } from 'react';
+import Selector from './Selector';
+import { GeoData } from './types'; // Importa GeoData
 
-interface GeoData {
-  prestador_nombre: string;
-  es_prestador_primario: boolean;
-  categoria_especialidad: string;
+interface Specialty {
+  id: number;
   nombre_especialidad: string;
+  categoria_especialidad: string;
 }
 
-interface InfoPanelProps {
-  data: GeoData[];
-}
-
-const InfoPanel: React.FC<InfoPanelProps> = ({ data }) => {
+const InfoPanel: React.FC<{ data: GeoData[] }> = ({ data }) => {
   const [filteredPrestadores, setFilteredPrestadores] = useState<string[]>([]);
 
+  // Verificar si hay datos disponibles
+  if (data.length === 0) {
+    return <p>No hay datos disponibles.</p>; // Mensaje si no hay datos
+  }
+
+  // Estructura de especialidades a partir de los datos
+  const specialtiesData: Specialty[] = Array.from(
+    new Map(
+      data.map((item, index) => [
+        item.nombre_especialidad,
+        { id: index, nombre_especialidad: item.nombre_especialidad, categoria_especialidad: item.categoria_especialidad },
+      ])
+    ).values()
+  );
+
+  // Manejo del cambio de categoría
   const handleCategoryChange = (category: string) => {
-    const specialties = data
+    const specialties = specialtiesData
       .filter((item) => item.categoria_especialidad === category)
       .map((item) => item.nombre_especialidad);
-    setFilteredPrestadores([]);
+    setFilteredPrestadores([]); // Reinicia los prestadores al cambiar de categoría
+    handleSpecialtyChange(''); // Reinicia la especialidad seleccionada
   };
 
+  // Manejo del cambio de especialidad
   const handleSpecialtyChange = (specialty: string) => {
-    const prestadores = data
-      .filter((item) => item.nombre_especialidad === specialty)
-      .map((item) => item.prestador_nombre);
-
-    setFilteredPrestadores(Array.from(new Set(prestadores))); // Elimina duplicados
+    const prestadores = Array.from(
+      new Set(
+        data
+          .filter((item) => item.nombre_especialidad === specialty)
+          .map((item) => item.prestador_nombre)
+      )
+    );
+    setFilteredPrestadores(prestadores); // Actualiza los prestadores filtrados
   };
+
+  // Obtener prestadores primarios únicos
+  const prestadoresPrimarios = Array.from(
+    new Set(data.filter((item) => item.es_prestador_primario).map((item) => item.prestador_nombre))
+  );
 
   return (
-    <div className="space-y-6">
-      {/* Prestador Primario */}
-      {data.length > 0 && data.some((item) => item.es_prestador_primario) && (
-        <div className="bg-white p-4 rounded-lg shadow-lg w-120">
-          <h2 className="text-lg font-semibold mb-4 text-custom-color">Prestador Primario</h2>
+    <div className="bg-white p-4 rounded shadow-lg space-y-6">
+      {/* Sección de Prestador Primario */}
+      {prestadoresPrimarios.length > 0 && (
+        <div>
+          <h2 className="text-lg font-semibold mb-2 text-custom-color">Prestador Primario</h2>
           <ul className="list-disc pl-5 text-custom-color">
-            {Array.from(new Set(
-              data.filter((item) => item.es_prestador_primario).map((item) => item.prestador_nombre)
-            )).map((prestadorNombre, index) => (
-              <li key={index} className="mb-2">{prestadorNombre}</li>
+            {prestadoresPrimarios.map((prestador, index) => (
+              <li key={index} className="mb-2">{prestador}</li>
             ))}
           </ul>
         </div>
       )}
 
-      {/* Filtrar por Especialidad - Solo mostrar si hay datos */}
-      {data.length > 0 && (
-        <div className="bg-white p-4 rounded-lg shadow-lg w-120">
-          <Selector
-            data={data}
-            onCategoryChange={handleCategoryChange}
-            onSpecialtyChange={handleSpecialtyChange}
-          />
-          {filteredPrestadores.length > 0 && (
-            <div className="mt-4">
-              <h3 className="text-lg font-semibold mb-2 text-custom-color">Prestadores:</h3>
-              <ul className="list-disc pl-5 text-custom-color">
-                {filteredPrestadores.map((prestadorNombre, index) => (
-                  <li key={index} className="mb-2">
-                    {prestadorNombre}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
+      {/* Selector de Especialidades */}
+      <Selector
+        data={specialtiesData}
+        onCategoryChange={handleCategoryChange}
+        onSpecialtyChange={handleSpecialtyChange}
+      />
+
+      {/* Mostrar Prestadores Filtrados */}
+      {filteredPrestadores.length > 0 ? (
+        <div>
+          <h3 className="text-lg font-semibold mb-2 text-custom-color">Prestadores por Especialidad:</h3>
+          <ul className="list-disc pl-5 text-custom-color">
+            {filteredPrestadores.map((prestador, index) => (
+              <li key={index} className="mb-2">{prestador}</li>
+            ))}
+          </ul>
         </div>
+      ) : (
+        filteredPrestadores.length === 0 && <p>Selecciona una especialidad para ver los prestadores.</p>
       )}
     </div>
   );

@@ -1,8 +1,9 @@
-// components/Selector.tsx
+// Selector.tsx
 import { useState, useEffect } from "react";
+import { Specialty } from './types'; // Asegúrate de que Specialty esté definida en types.ts si es necesario
 
 interface SelectorProps {
-  data: any[];
+  data: Specialty[];
   onCategoryChange: (category: string) => void;
   onSpecialtyChange: (specialty: string) => void;
 }
@@ -35,38 +36,33 @@ const Selector: React.FC<SelectorProps> = ({ data, onCategoryChange, onSpecialty
           className="p-2 border rounded"
         >
           <option value="">Seleccione una categoría</option>
-          {Array.from(new Set(data.map((item) => item.categoria_especialidad))).map(
-            (category, index) => (
-              <option key={index} value={category}>
-                {category}
-              </option>
-            )
-          )}
-        </select>
-      </label>
-
-      <label className="flex flex-col gap-2 text-custom-color mt-4">
-        Nombre de Especialidad:
-        <select
-          value={selectedSpecialty}
-          onChange={(e) => setSelectedSpecialty(e.target.value)}
-          className="p-2 border rounded"
-          disabled={!selectedCategory} // Deshabilitar si no se ha seleccionado una categoría
-        >
-          <option value="">Seleccione una especialidad</option>
-          {Array.from(
-            new Set(
-              data
-                .filter((item) => item.categoria_especialidad === selectedCategory)
-                .map((item) => item.nombre_especialidad)
-            )
-          ).map((specialty, index) => (
-            <option key={index} value={specialty}>
-              {specialty}
+          {Array.from(new Set(data.map((item) => item.categoria_especialidad))).map((category, index) => (
+            <option key={index} value={category}>
+              {category}
             </option>
           ))}
         </select>
       </label>
+
+      {selectedCategory && (
+        <label className="flex flex-col gap-2 text-custom-color">
+          Especialidad:
+          <select
+            value={selectedSpecialty}
+            onChange={(e) => setSelectedSpecialty(e.target.value)}
+            className="p-2 border rounded"
+          >
+            <option value="">Seleccione una especialidad</option>
+            {data
+              .filter((item) => item.categoria_especialidad === selectedCategory)
+              .map((item) => (
+                <option key={item.id} value={item.nombre_especialidad}>
+                  {item.nombre_especialidad}
+                </option>
+              ))}
+          </select>
+        </label>
+      )}
     </div>
   );
 };

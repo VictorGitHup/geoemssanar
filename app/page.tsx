@@ -1,22 +1,11 @@
+// page.tsx
 "use client";
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import { fetchGeoData } from "./components/geo";
 import Map from "./components/Map";
 import InfoPanel from "./components/InfoPanel";
-
-interface GeoData {
-  departamento_nombre: string;
-  municipio_nombre: string;
-  region: string;
-  subregion: string;
-  prestador_nombre: string;
-  latitud: number;
-  longitud: number;
-  es_prestador_primario: boolean;
-  categoria_especialidad: string;
-  nombre_especialidad: string;
-}
+import { GeoData } from "./components/types"; // Importa GeoData
 
 export default function Home() {
   const [departamento, setDepartamento] = useState<number | "">("");
@@ -104,12 +93,10 @@ export default function Home() {
         {error && <p className="text-red-500">{error}</p>}
       </div>
 
-      {/* Panel de Información Flotante - Prestador primario y selección tec */}
       <div className="absolute right-2 top-14 z-10">
         <InfoPanel data={data} />
       </div>
 
-      {/* Información Complementaria - regiones*/}
       {data.length > 0 && (
         <div className="absolute left-1/2 transform -translate-x-1/2 bottom-10 bg-white p-6 rounded-lg shadow-lg z-10 w-full max-w-4xl">
           <h5
