@@ -104,7 +104,7 @@ export default function Home() {
         {error && <p className="text-red-500">{error}</p>}
       </div>
 
-      {/* Panel de Información Flotante */}
+      {/* Panel de Información Flotante - Prestador primario y selección tec */}
       <div className="absolute right-2 top-14 z-10">
         <InfoPanel data={data} />
       </div>
