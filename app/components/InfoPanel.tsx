@@ -18,6 +18,7 @@ const InfoPanel: React.FC<{ data: GeoData[] }> = ({ data }) => {
   }
 
   // Estructura de especialidades a partir de los datos
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const specialtiesData: Specialty[] = Array.from(
     new Map(
       data.map((item, index) => [
