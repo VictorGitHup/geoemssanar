@@ -1,6 +1,6 @@
 // page.tsx
 "use client";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Image from "next/image";
 import { fetchGeoData } from "./components/geo";
 import Map from "./components/Map";
@@ -40,6 +40,17 @@ export default function Home() {
       console.error("Error al hacer la solicitud:", error);
       setError("Hubo un problema al enviar los datos.");
     }
+  };
+
+  // Función actualizada para manejar la selección de ubicación
+  const handleLocationSelect = (location: google.maps.LatLngLiteral) => {
+    // Asegurarse de que las propiedades coincidan
+    setMapCoordinates({
+      latitude: location.lat, // Cambiar 'lat' por 'latitude' si es necesario
+      longitude: location.lng, // Cambiar 'lng' por 'longitude' si es necesario
+    });
+    setZoomLevel(14); // Ajusta el zoom si es necesario
+    console.log('Ubicación seleccionada:', location); // Debugging
   };
 
   return (
@@ -94,7 +105,7 @@ export default function Home() {
       </div>
 
       <div className="absolute right-2 top-14 z-10">
-        <InfoPanel data={data} />
+        <InfoPanel data={data} onLocationSelect={handleLocationSelect} />
       </div>
 
       {data.length > 0 && (

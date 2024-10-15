@@ -1,6 +1,6 @@
 // Selector.tsx
 import { useState, useEffect } from "react";
-import { Specialty } from './types'; // Asegúrate de que Specialty esté definida en types.ts si es necesario
+import { Specialty } from './types';
 
 interface SelectorProps {
   data: Specialty[];
