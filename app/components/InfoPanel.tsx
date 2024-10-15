@@ -29,6 +29,7 @@ const InfoPanel: React.FC<{ data: GeoData[] }> = ({ data }) => {
 
   // Manejo del cambio de categoría
   const handleCategoryChange = (category: string) => {
+    // Filtrar especialidades en función de la categoría seleccionada
     const specialties = specialtiesData
       .filter((item) => item.categoria_especialidad === category)
       .map((item) => item.nombre_especialidad);
