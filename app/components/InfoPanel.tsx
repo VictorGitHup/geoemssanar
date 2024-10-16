@@ -150,7 +150,7 @@ const InfoPanel: React.FC<InfoPanelProps> = ({ data, onLocationSelect, onClose }
               </div>
             ) : (
               filteredPrestadores.length === 0 && (
-                <p className="text-custom-color text-center">Seleccione una especialidad</p>
+                <p className="text-custom-color text-center">Seleccione una categoría y especialidad para ampliar la información</p>
               )
             )}
 
@@ -159,13 +159,15 @@ const InfoPanel: React.FC<InfoPanelProps> = ({ data, onLocationSelect, onClose }
                 Buscar ubicación:
               </label>
               <input
-                style={{ color: '#000000' }}
-                id="search"
-                type="text"
-                value={searchInput}
-                onChange={(e) => setSearchInput(e.target.value)}
-                className="flex-1 p-2 border rounded mb-2"
+                  style={{ color: '#000000' }}
+                  id="search"
+                  type="text"
+                  value={searchInput}
+                  onChange={(e) => setSearchInput(e.target.value)}
+                  className="flex-1 p-2 border rounded mb-2"
+                  placeholder='Por favor, ingrese el nombre del prestador...'
               />
+
               <button
                 onClick={handleSearchClick}
                 className="bg-blue-500 text-white rounded px-4 py-2 w-full"
