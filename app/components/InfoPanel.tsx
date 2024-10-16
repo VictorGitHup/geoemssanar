@@ -94,12 +94,17 @@ const InfoPanel: React.FC<InfoPanelProps> = ({ data, onLocationSelect, onClose }
       {/* Botón de apertura/cierre fuera del panel */}
       <button
   onClick={togglePanel}
-  className={`absolute top-2 -left-9 bg-green-800 text-white p-3 hover:bg-green-600 transition duration-200 transform hover:scale-110 z-20 ${
-    isExpanded ? 'bg-toggleClose hover:bg-toggleClose-hover' : 'bg-toggleOpen hover:bg-toggleOpen-hover'
-  } rounded-tl-lg  rounded-bl-lg `}
+  className={`bg-green-800 text-white p-3 hover:bg-gray-600 transition duration-200 absolute right-1 top-0 ${
+    isExpanded
+      ? 'bg-toggleClose hover:bg-toggleClose-hover' // Estilo cuando el panel está expandido
+      : 'bg-toggleOpen hover:bg-toggleOpen-hover' // Estilo cuando el panel está contraído
+  } rounded-tl-lg rounded-bl-lg`}
 >
-        {isExpanded ? '✖ ' : ' ◀ '}
-      </button>
+  {isExpanded ? '✖ ' : ' ◀ '}
+</button>
+
+
+
 
       {/* Contenido del InfoPanel */}
       <div
