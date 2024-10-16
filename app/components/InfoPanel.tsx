@@ -19,6 +19,7 @@ const InfoPanel: React.FC<InfoPanelProps> = ({ data, onLocationSelect, onClose }
   const [searchInput, setSearchInput] = useState<string>('');
   const [selectedSpecialty, setSelectedSpecialty] = useState<string>('Seleccione una especialidad');
   const [selectedCategory, setSelectedCategory] = useState<string>('Seleccione una categoría');
+  const [isExpanded, setIsExpanded] = useState<boolean>(true);
 
   useEffect(() => {
     setFilteredPrestadores([]);
@@ -84,73 +85,92 @@ const InfoPanel: React.FC<InfoPanelProps> = ({ data, onLocationSelect, onClose }
     });
   };
 
+  const togglePanel = () => {
+    setIsExpanded(!isExpanded);
+  };
+
   return (
-    <div className="relative bg-white p-4 sm:p-6 rounded-lg shadow-lg z-10 w-72 sm:w-80 md:w-96 lg:w-1/1">
-      <button onClick={onClose} className="absolute top-2 right-2 text-gray-500 hover:text-gray-800" aria-label="Cerrar">
-        &times;
+    <div className="relative">
+      {/* Botón de apertura/cierre fuera del panel */}
+      <button
+  onClick={togglePanel}
+  className={`absolute top-2 -left-9 bg-green-800 text-white p-3 hover:bg-green-600 transition duration-200 transform hover:scale-110 z-20 ${
+    isExpanded ? 'bg-toggleClose hover:bg-toggleClose-hover' : 'bg-toggleOpen hover:bg-toggleOpen-hover'
+  } rounded-tl-lg  rounded-bl-lg `}
+>
+        {isExpanded ? '✖ ' : ' ◀ '}
       </button>
 
-      {prestadoresPrimarios.length > 0 && (
-        <div className="mb-4">
-          <h2 className="text-base sm:text-lg lg:text-xl font-semibold mb-2 text-custom-color text-center">
-            Prestador Primario
-          </h2>
-          <ul className="list-disc pl-5 text-sm sm:text-base text-custom-color space-y-2">
-            {prestadoresPrimarios.map((prestador, index) => (
-              <li key={index}>{prestador}</li>
-            ))}
-          </ul>
-        </div>
-      )}
+      {/* Contenido del InfoPanel */}
+      <div
+        className={`bg-white p-4 rounded-lg shadow-lg z-10 transition-all duration-300 ${
+          isExpanded ? 'block' : 'hidden'
+        }`}
+      >
+        {isExpanded && (
+          <>
+            {prestadoresPrimarios.length > 0 && (
+              <div className="mb-4">
+                <h2 className="text-base sm:text-lg lg:text-xl font-semibold mb-2 text-custom-color text-center">
+                  Prestador Primario
+                </h2>
+                <ul className="list-disc pl-5 text-sm sm:text-base text-custom-color space-y-2">
+                  {prestadoresPrimarios.map((prestador, index) => (
+                    <li key={index}>{prestador}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
 
-      <div className="mb-4">
-        <Selector
-          data={specialties}
-          onCategoryChange={handleCategoryChange}
-          onSpecialtyChange={handleSpecialtyChange}
-          selectedSpecialty={selectedSpecialty}
-          selectedCategory={selectedCategory}
-        />
+            <div className="mb-4">
+              <Selector
+                data={specialties}
+                onCategoryChange={handleCategoryChange}
+                onSpecialtyChange={handleSpecialtyChange}
+                selectedSpecialty={selectedSpecialty}
+                selectedCategory={selectedCategory}
+              />
+            </div>
+
+            {filteredPrestadores.length > 0 ? (
+              <div className="bg-gray-100 p-4 rounded-lg">
+                <h3 className="text-base sm:text-lg lg:text-xl font-semibold mb-2 text-custom-color">
+                  Prestadores por Especialidad:
+                </h3>
+                <ul className="list-disc pl-5 text-sm sm:text-base text-custom-color overflow-auto max-h-64 space-y-2">
+                  {filteredPrestadores.map((prestador, index) => (
+                    <li key={index}>{prestador}</li>
+                  ))}
+                </ul>
+              </div>
+            ) : (
+              filteredPrestadores.length === 0 && (
+                <p className="text-custom-color text-center">Seleccione una especialidad</p>
+              )
+            )}
+
+            <div className="flex flex-col mt-4">
+              <label style={{ color: '#000000' }} htmlFor="search">
+                Buscar ubicación:
+              </label>
+              <input
+                style={{ color: '#000000' }}
+                id="search"
+                type="text"
+                value={searchInput}
+                onChange={(e) => setSearchInput(e.target.value)}
+                className="flex-1 p-2 border rounded mb-2"
+              />
+              <button
+                onClick={handleSearchClick}
+                className="bg-blue-500 text-white rounded px-4 py-2 w-full"
+              >
+                Buscar
+              </button>
+            </div>
+          </>
+        )}
       </div>
-
-      {filteredPrestadores.length > 0 ? (
-        <div className="bg-gray-100 p-4 rounded-lg">
-          <h3 className="text-base sm:text-lg lg:text-xl font-semibold mb-2 text-custom-color">
-            Prestadores por Especialidad:
-          </h3>
-          <ul className="list-disc pl-5 text-sm sm:text-base text-custom-color overflow-auto max-h-64 space-y-2">
-            {filteredPrestadores.map((prestador, index) => (
-              <li key={index}>{prestador}</li>
-            ))}
-          </ul>
-        </div>
-      ) : (
-        filteredPrestadores.length === 0 && (
-          <p className="text-custom-color text-center">Seleccione una especialidad</p>
-        )
-      )}
-
-<div className="flex flex-col mt-4">
-<label style={{ color: '#000000' }} htmlFor="search"> {/* Color Tomate */}
-    Buscar ubicación:
-  </label>
-  <div className="flex items-center">
-    <input style={{ color: '#000000' }}
-      id="search"
-      type="text"
-      value={searchInput}
-      onChange={(e) => setSearchInput(e.target.value)}
-      className="flex-1 p-2 border rounded mr-2"
-    />
-    <button
-      onClick={handleSearchClick}
-      className="bg-blue-500 text-white rounded px-4 py-2"
-    >
-      Buscar
-    </button>
-  </div>
-</div>
-
     </div>
   );
 };
