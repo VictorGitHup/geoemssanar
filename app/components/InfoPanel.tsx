@@ -2,67 +2,78 @@ import React, { useState, useEffect } from 'react';
 import Selector from './Selector';
 import { GeoData } from './types';
 
-interface Specialty {
-  id: number; 
-  nombre_especialidad: string;
-  categoria_especialidad: string;
-}
-
 interface InfoPanelProps {
   data: GeoData[];
   onLocationSelect: (location: google.maps.LatLngLiteral) => void;
-  onClose: () => void; 
+  onClose: () => void;
 }
 
 const InfoPanel: React.FC<InfoPanelProps> = ({ data, onLocationSelect, onClose }) => {
-  const [filteredPrestadores, setFilteredPrestadores] = useState<string[]>([]);
+  const [filteredPrestadoresPrimarios, setFilteredPrestadoresPrimarios] = useState<GeoData[]>([]);
+  const [filteredPrestadoresComplementarios, setFilteredPrestadoresComplementarios] = useState<GeoData[]>([]);
+  const [filteredPrestadoresMedicamentos, setFilteredPrestadoresMedicamentos] = useState<GeoData[]>([]);
+  const [filteredPrestadoresOtros, setFilteredPrestadoresOtros] = useState<GeoData[]>([]);
+  const [filteredPrestadoresInfo, setFilteredPrestadoresInfo] = useState<GeoData[]>([]);
   const [searchInput, setSearchInput] = useState<string>('');
-  const [selectedSpecialty, setSelectedSpecialty] = useState<string>('Seleccione una especialidad');
-  const [selectedCategory, setSelectedCategory] = useState<string>('Seleccione una categoría');
   const [isExpanded, setIsExpanded] = useState<boolean>(true);
+  const [selectedPrestadorPrimario, setSelectedPrestadorPrimario] = useState<number | null>(null);
+  const [selectedPrestadorComplementario, setSelectedPrestadorComplementario] = useState<number | null>(null);
+  const [selectedPrestadorMedicamentos, setSelectedPrestadorMedicamentos] = useState<number | null>(null);
+  const [selectedPrestadorOtros, setSelectedPrestadorOtros] = useState<number | null>(null);
+  const [selectedPrestadorInfo, setSelectedPrestadorInfo] = useState<number | null>(null);
 
   useEffect(() => {
-    setFilteredPrestadores([]);
-  }, [data]);
+    // Filtrar prestadores primarios activos
+    const prestadoresPrimariosActivos = data.filter(
+      (item) => item.estado_contrato && item.id_prestador
+    );
+    setFilteredPrestadoresPrimarios(prestadoresPrimariosActivos);
 
-  const handleCategoryChange = (category: string) => {
-    setSelectedCategory(category);
-    setFilteredPrestadores([]);
-    setSelectedSpecialty('Seleccione una especialidad');
+    // Filtrar prestadores complementarios activos
+    const prestadoresComplementariosActivos = data.filter(
+      (item) => item.estado_contrato_compl && item.id_pres_compl
+    );
+    setFilteredPrestadoresComplementarios(prestadoresComplementariosActivos);
+
+    // Filtrar prestadores complementarios activos
+    const prestadoresMedicamentosActivos = data.filter(
+      (item) => item.estado_contrato_med && item.id_pres_med
+    );
+    setFilteredPrestadoresMedicamentos(prestadoresMedicamentosActivos);
+
+    // Filtrar prestadores complementarios otros servicios
+    const prestadoresOtrosActivos = data.filter(
+      (item) => item.estado_contrato_otros && item.id_pres_otros    );
+    setFilteredPrestadoresOtros(prestadoresOtrosActivos);
+
+    // Filtrar prestadores información complementaria
+    const prestadoresInfoActivos = data.filter(
+      (item) => item.estado_centralidad && item.id_pres_infocom    );
+    setFilteredPrestadoresInfo(prestadoresInfoActivos);
+
+  }, 
+  
+  [data]);
+
+  const handlePrestadorPrimarioSelect = (prestadorId: number) => {
+    setSelectedPrestadorPrimario(prestadorId);
   };
 
-  const handleSpecialtyChange = (specialty: string) => {
-    if (specialty !== 'Seleccione una especialidad') {
-      setSelectedSpecialty(specialty);
-      const prestadores = data
-        .filter((item) => item.nombre_especialidad === specialty)
-        .map((item) => ({
-          nombre: item.prestador_nombre,
-          complejidad: item.complejidad,
-        }));
-
-      const uniquePrestadores = Array.from(
-        new Set(prestadores.map((prestador) => prestador.nombre))
-      ).map((nombre) => {
-        const prestadorInfo = prestadores.find((prestador) => prestador.nombre === nombre);
-        return `${prestadorInfo?.nombre} (${prestadorInfo?.complejidad})`;
-      });
-
-      setFilteredPrestadores(uniquePrestadores);
-    }
+  const handlePrestadorComplementarioSelect = (prestadorId: number) => {
+    setSelectedPrestadorComplementario(prestadorId);
   };
 
-  const specialties: Specialty[] = Array.from(
-    new Set(data.map(item => item.nombre_especialidad))
-  ).map((nombre_especialidad, index) => ({
-    id: index,
-    nombre_especialidad,
-    categoria_especialidad: data.find(item => item.nombre_especialidad === nombre_especialidad)?.categoria_especialidad || ''
-  }));
+  const handlePrestadorMedicamentosSelect = (prestadorId: number) => {
+    setSelectedPrestadorMedicamentos(prestadorId);
+  };
 
-  const prestadoresPrimarios = Array.from(
-    new Set(data.filter((item) => item.es_prestador_primario).map((item) => item.prestador_nombre))
-  );
+  const handlePrestadorOtrosSelect = (prestadorId: number) => {
+    setSelectedPrestadorOtros(prestadorId);
+  };
+
+  const handlePrestadorInfoSelect = (prestadorId: number) => {
+    setSelectedPrestadorInfo(prestadorId);
+  };
 
   const handleSearchClick = () => {
     if (!searchInput.trim()) {
@@ -91,90 +102,122 @@ const InfoPanel: React.FC<InfoPanelProps> = ({ data, onLocationSelect, onClose }
 
   return (
     <div className="relative">
-      {/* Botón de apertura/cierre fuera del panel */}
       <button
-  onClick={togglePanel}
-  className={`bg-green-800 text-white p-3 hover:bg-gray-600 transition duration-200 absolute right-1 top-0 ${
-    isExpanded
-      ? 'bg-toggleClose hover:bg-toggleClose-hover' // Estilo cuando el panel está expandido
-      : 'bg-toggleOpen hover:bg-toggleOpen-hover' // Estilo cuando el panel está contraído
-  } rounded-tl-lg rounded-bl-lg`}
->
-  {isExpanded ? '✖ ' : ' ◀ '}
-</button>
+        onClick={togglePanel}
+        className={`bg-green-500 text-white p-3 hover:bg-gray-600 transition duration-200 absolute right-1 top-0 ${
+          isExpanded
+            ? 'bg-toggleClose hover:bg-toggleClose-hover'
+            : 'bg-toggleOpen hover:bg-toggleOpen-hover'
+        } rounded-tl-lg rounded-bl-lg`}
+      >
+        {isExpanded ? '✖ ' : ' ◀ '}
+      </button>
 
-
-
-
-      {/* Contenido del InfoPanel */}
       <div
         className={`bg-white p-4 rounded-lg shadow-lg z-10 transition-all duration-300 ${
+    isExpanded ? 'block' : 'hidden'
+  } md:w-70 lg:w-lg max-h-screen overflow-y-auto ${
           isExpanded ? 'block' : 'hidden'
         }`}
       >
         {isExpanded && (
           <>
-            {prestadoresPrimarios.length > 0 && (
-              <div className="mb-4">
-                <h2 className="text-base sm:text-lg lg:text-xl font-semibold mb-2 text-custom-color text-center">
-                  Prestador Primario
-                </h2>
-                <ul className="list-disc pl-5 text-sm sm:text-base text-custom-color space-y-2">
-                  {prestadoresPrimarios.map((prestador, index) => (
-                    <li key={index}>{prestador}</li>
-                  ))}
-                </ul>
-              </div>
-            )}
-
             <div className="mb-4">
               <Selector
-                data={specialties}
-                onCategoryChange={handleCategoryChange}
-                onSpecialtyChange={handleSpecialtyChange}
-                selectedSpecialty={selectedSpecialty}
-                selectedCategory={selectedCategory}
+                data={data}
+                onPrestadorPrimarioChange={handlePrestadorPrimarioSelect}
+                onPrestadorComplementarioChange={handlePrestadorComplementarioSelect}
+                onPrestadorMedicamentosChange={handlePrestadorMedicamentosSelect}
+                onPrestadorOtrosChange={handlePrestadorOtrosSelect}
+                onPrestadorInfoChange={handlePrestadorInfoSelect}
+                selectedPrestadorPrimario={selectedPrestadorPrimario}
+                selectedPrestadorComplementario={selectedPrestadorComplementario}
+                selectedPrestadorMedicamentos={selectedPrestadorMedicamentos}
+                selectedPrestadorOtros={selectedPrestadorOtros}
+                selectedPrestadorInfo={selectedPrestadorInfo}
               />
             </div>
 
-            {filteredPrestadores.length > 0 ? (
-              <div className="bg-gray-100 p-4 rounded-lg">
-                <h3 className="text-base sm:text-lg lg:text-xl font-semibold mb-2 text-custom-color">
-                  Prestadores por Especialidad:
+            {/* Mostrar detalles del prestador primario */}
+            {selectedPrestadorPrimario ? (
+              <div className="w-full p-2 border border-gray-300 rounded mt-2 text-black bg-gray-100">
+
+              {/* Título con texto más pequeño */}
+              <h5 className="text-xs sm:text-sm lg:text-base font-semibold">
+  Detalles del Prestador Primario
+</h5>          
+              {/* Datos con texto más pequeño */}
+              <p className="text-sm">Nombre: {filteredPrestadoresPrimarios.find((p) => p.id_prestador === selectedPrestadorPrimario)?.prestador_p_nombre}</p>
+              <p className="text-sm">Dirección: {filteredPrestadoresPrimarios.find((p) => p.id_prestador === selectedPrestadorPrimario)?.prestador_direccion}</p>
+              <p className="text-sm">Teléfono: {filteredPrestadoresPrimarios.find((p) => p.id_prestador === selectedPrestadorPrimario)?.prestador_telf}</p>
+              
+            </div>
+            
+            ) : null}
+
+            {/* Mostrar detalles del prestador complementario */}
+            {selectedPrestadorComplementario ? (
+              <div className="w-full p-2 border border-gray-300 rounded mt-2 text-black bg-gray-100">
+
+                <h3 className="text-xs sm:text-sm lg:text-base font-semibold">
+                  Detalles del Prestador Complementario
                 </h3>
-                <ul className="list-disc pl-5 text-sm sm:text-base text-custom-color overflow-auto max-h-64 space-y-2">
-                  {filteredPrestadores.map((prestador, index) => (
-                    <li key={index}>{prestador}</li>
-                  ))}
-                </ul>
+                <p className="text-sm">Nombre: {filteredPrestadoresComplementarios.find((p) => p.id_pres_compl === selectedPrestadorComplementario)?.prestador_compl_nombre}</p>
+                <p className="text-sm">Dirección: {filteredPrestadoresComplementarios.find((p) => p.id_pres_compl === selectedPrestadorComplementario)?.pres_compl_direccion}</p>
+                <p className="text-sm">Teléfono: {filteredPrestadoresComplementarios.find((p) => p.id_pres_compl === selectedPrestadorComplementario)?.pres_compl_telf}</p>
               </div>
-            ) : (
-              filteredPrestadores.length === 0 && (
-                <p className="text-custom-color text-center">Seleccione una categoría y especialidad para ampliar la información</p>
-              )
-            )}
+            ) : null}
 
-            <div className="flex flex-col mt-4">
-              <label style={{ color: '#000000' }} htmlFor="search">
-                Buscar ubicación:
-              </label>
-              <input
-                  style={{ color: '#000000' }}
-                  id="search"
-                  type="text"
-                  value={searchInput}
-                  onChange={(e) => setSearchInput(e.target.value)}
-                  className="flex-1 p-2 border rounded mb-2"
-                  placeholder='Por favor, ingrese el nombre del prestador...'
-              />
+            {/* Mostrar detalles del prestador medicamentos */}
+            {selectedPrestadorMedicamentos ? (
+              <div className="w-full p-2 border border-gray-300 rounded mt-2 text-black bg-gray-100">
 
-              <button
-                onClick={handleSearchClick}
-                className="bg-blue-500 text-white rounded px-4 py-2 w-full"
-              >
-                Buscar
-              </button>
-            </div>
+                <h3 className="text-xs sm:text-sm lg:text-base font-semibold">
+                  Detalles del Prestador Complementario
+                </h3>
+                <p className="text-sm">Nombre: {filteredPrestadoresMedicamentos.find((p) => p.id_pres_med === selectedPrestadorMedicamentos)?.prestador_med_nombre}</p>
+                <p className="text-sm">Dirección: {filteredPrestadoresMedicamentos.find((p) => p.id_pres_med === selectedPrestadorMedicamentos)?.pres_med_direccion}</p>
+                <p className="text-sm">Teléfono: {filteredPrestadoresMedicamentos.find((p) => p.id_pres_med === selectedPrestadorMedicamentos)?.pres_med_telf}</p>
+              </div>
+            ) : null}
+
+            {/* Mostrar detalles del prestador otros servicios */}
+            {selectedPrestadorOtros ? (
+              <div className="w-full p-1 border border-gray-300 rounded mt-2 text-black bg-gray-100">
+
+                <h3 className="text-xs sm:text-sm lg:text-base font-semibold">
+                  Detalles del Otros Prestadores
+                </h3>
+                <p className="text-sm">Nombre: {filteredPrestadoresOtros.find((p) => p.id_pres_otros === selectedPrestadorOtros)?.prestador_otros_nombre}</p>
+                <p className="text-sm">Dirección: {filteredPrestadoresOtros.find((p) => p.id_pres_otros === selectedPrestadorOtros)?.pres_otros_direccion}</p>
+                <p className="text-sm">Teléfono: {filteredPrestadoresOtros.find((p) => p.id_pres_otros === selectedPrestadorOtros)?.pres_otros_telf}</p>
+              </div>
+            ) : null}
+
+            {/* Campo de búsqueda */}
+  <div className="flex p-1  rounded mt-2 flex-row space-x-2">
+
+  <input
+    type="text"
+    id="search"
+    value={searchInput}
+    onChange={(e) => setSearchInput(e.target.value)}
+    placeholder="Escribe un lugar"
+    className="w-full text-black p-2 border border-gray-300 rounded-md"
+    onKeyDown={(e) => {
+      if (e.key === 'Enter') {
+        handleSearchClick();  // Llama a la función de búsqueda al presionar Enter
+      }
+    }}
+  />
+  <button
+    onClick={handleSearchClick}
+    className="px-4 py-2 bg-green-800 text-white rounded-md hover:bg-green-700 transition duration-200"
+  >
+    Buscar
+  </button>
+</div>
+
           </>
         )}
       </div>

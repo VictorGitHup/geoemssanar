@@ -3,7 +3,7 @@
 const SUPABASE_API_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const SUPABASE_API_KEY = process.env.NEXT_PUBLIC_SUPABASE_KEY;
 
-export async function fetchGeoData(id_departamento: number, id_municipio: number) {
+export async function fetchGeoData(id_departamento_param: number, id_municipio_param: number) {
   // Validar que la URL y la clave de API estén definidas
   if (!SUPABASE_API_URL) {
     throw new Error("SUPABASE_API_URL no está definida. Asegúrate de que la variable de entorno esté configurada.");
@@ -21,8 +21,8 @@ export async function fetchGeoData(id_departamento: number, id_municipio: number
       'Authorization': `Bearer ${SUPABASE_API_KEY}`,
     },
     body: JSON.stringify({
-      id_departamento,
-      id_municipio,
+      id_departamento_param,
+      id_municipio_param,
     }),
   });
 

@@ -1,0 +1,19 @@
+[
+    {
+      "id_departamento": 76,
+      "nombre_departamento": "Valle del Cauca",
+      "municipios": [
+        { "id_municipio": 76109, "nombre_municipio": "Buenaventura" },
+        { "id_municipio": 76001, "nombre_municipio": "Cali" }
+      ]
+    },
+    {
+      "id_departamento": 19,
+      "nombre_departamento": "Cauca",
+      "municipios": [
+        { "id_municipio": 19001, "nombre_municipio": "Popayán" },
+        { "id_municipio": 19256, "nombre_municipio": "Guapi" }
+      ]
+    }
+  ]
+  
